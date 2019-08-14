@@ -1,6 +1,6 @@
 ---
 title: "Infer Demo"
-author: "Allison Theobold"
+author: "Your Group Member Names Here!"
 output: html_document
 ---
 
