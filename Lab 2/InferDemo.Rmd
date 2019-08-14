@@ -1,0 +1,204 @@
+---
+title: "Infer Demo"
+author: "Allison Theobold"
+output: html_document
+---
+
+```{r setup, echo = FALSE, message = FALSE}
+library(infer)
+library(Sleuth3)
+library(tidyverse)
+```
+
+# Infer Package 
+
+![](Infer.JPG)
+
+- The `infer` package performs statistical inference using an expressive statistical grammar that coheres with the `tidyverse` design framework.
+
+- Each stage of the testing or estimation process is explicit. 
+- Stages of the proecess are chained together using the pipe operator (`%>%`), to be consistent with `dplyr` syntax
+- Post estimation, stages in the plotting process are chained together using the addition operator (`+`), to be consistent with `ggplot` syntax
+
+# Data from Open Intro 
+
+```{r data, results = 'hide'}
+# read_csv does not coerce strings to factors
+evals <- read_csv("evals.csv")
+```
+
+```{r}
+glimpse(evals)
+
+# data cleaning 
+evals <- evals %>% 
+          rename(sex = gender) %>%
+          mutate(
+            sex = as.factor(sex), 
+            rank = as.factor(rank)
+                 )
+
+```
+
+
+# Single Mean Examples
+
+## Permutation
+
+
+```{r, singlemean}
+# observed statistic
+sample_mean <- evals %>% 
+                filter(is.na(bty_avg) == FALSE) %>%
+                summarize(mean = mean(bty_avg))
+
+mu <- 4 
+mu_diff <- sample_mean - mu
+
+  
+# generation of permutation distribution:
+# 1. shift data to be centered at hypothesized mean
+# 2. bootstrap from the shifted data 
+
+permute <- evals %>% 
+           filter(is.na(bty_avg) == FALSE) %>% 
+           select(bty_avg) %>% 
+           mutate(shifted_bty = bty_avg - 0.4178445) %>% 
+           specify(response = shifted_bty, explanatory = NULL) %>% 
+           hypothesize(null = "point", mu = mu) %>% 
+           generate(reps = 5000, type = "bootstrap") %>% 
+           calculate(stat = "mean")
+  
+
+# p-value for hypothesis test
+permute %>% 
+  get_p_value(obs_stat = sample_mean, direction = "two_sided")
+
+
+# plot of p-value
+permute %>% 
+  visualize(method = "simulation") + 
+  shade_p_value(sample_mean, direction = "both")  + 
+  labs(x = "Mean Average Beauty Score", 
+       title = "Permutation for a Single Mean")
+
+
+```
+
+```{r}
+
+bootstrap <- evals %>% 
+              filter(is.na(bty_avg) == FALSE) %>% 
+              select(bty_avg) %>% 
+              specify(response = bty_avg, explanatory = NULL) %>% 
+              generate(reps = 5000, type = "bootstrap") %>% 
+              calculate(stat = "mean")
+
+
+
+# CI for extimation
+CI <- bootstrap %>% 
+      get_confidence_interval(level = 0.92)
+
+# plot of CI
+bootstrap %>% 
+  visualise(method = "simulation") + 
+  shade_confidence_interval(endpoints = CI) + 
+  labs(x = "Mean Average Beauty Score", 
+       title = "Bootstrap for a Single Mean")
+
+```
+
+
+## t-test  
+
+```{r}
+# tidier output than the t.test function
+evals %>% 
+  t_test(bty_avg ~ NULL, mu = 4, 
+         alternative = "two_sided", 
+         conf_level = 0.90)
+
+```
+
+
+# Difference in Means Example 
+
+## Permutation
+
+
+```{r, diffmeans}
+# observed statistic
+diff_mean <- evals %>% 
+              specify(bty_avg ~ sex) %>%
+              calculate(stat = "diff in means", 
+                        order = c("male", "female"))
+
+permute <- evals %>% 
+           filter(is.na(bty_avg) == FALSE) %>%
+           specify(bty_avg ~ sex) %>% 
+           hypothesize(null = "independence") %>% 
+           generate(reps = 5000, type = "permute") %>% 
+           calculate(stat = "diff in means", 
+                     order = c("male", "female"))
+  
+
+# p-value for hypothesis test
+permute %>% 
+  get_p_value(obs_stat = diff_mean, direction = "two_sided")
+
+
+# plot of p-value
+permute %>% 
+  visualize(method = "simulation") + 
+  shade_p_value(diff_mean, direction = "both")  + 
+  labs(x = "Difference in Mean Average Beauty Score (Male - Female)", 
+       title = "Permutation for a Difference in Means")
+
+
+```
+
+```{r}
+
+bootstrap <- evals %>% 
+              filter(is.na(bty_avg) == FALSE) %>% 
+              specify(bty_avg ~ sex) %>% 
+              generate(reps = 5000, type = "bootstrap") %>% 
+              calculate(stat = "diff in means", 
+                        order = c("male", "female"))
+
+
+
+# CI for extimation
+CI <- bootstrap %>% 
+      get_confidence_interval(level = 0.92)
+
+# plot of CI
+bootstrap %>% 
+  visualise(method = "simulation") + 
+  shade_confidence_interval(endpoints = CI) + 
+  labs(x = "Difference in Mean Average Beauty Score (Male - Female)", 
+       title = "Bootstrap for a Difference in Means")
+
+```
+
+
+## t-test  
+
+```{r}
+# tidier output than the t.test function
+evals %>% 
+  t_test(bty_avg ~ sex, 
+         order = c("male", "female"), 
+         alternative = "two_sided", 
+         conf_level = 0.90)
+
+```
+
+
+# References 
+
+[Infer Package Reference Page](https://infer.netlify.com/index.html)
+
+[A moderndive into R and the tidyverse](https://moderndive.com/B-appendixB.html#two-means-independent-samples)
+
