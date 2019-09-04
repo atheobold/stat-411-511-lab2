@@ -1,0 +1,82 @@
+---
+title: "Using GitHub in RStudio Cloud"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+To get your team's lab assignment in GitHub into the RStudio Cloud you need to 
+carry out the following steps:
+
+1. When you log-in to GitHub, your dashboard will appear, click on the drop-down
+bar on the left hand side to navigate to the course's workspace (it should say 
+Stat-511-section-###)  
+2. Click on the course page 
+3. Click "View Organization"  
+4. This brings you to the course workspace  
+5. Your repositories (lab assignments) will appear in the Repositories tab  
+6. Click on your team's Lab 2 repository  
+7. This brings you to the workspace for your team's assignment  
+8. Click on the green "Clone or Download" button  
+9. Click the clipboard icon or copy the htttps link  
+
+Now, in RStudio Cloud, you need to carry out the following steps:  
+
+1. Log-in and navigate to your course's workspace (using the upper left hand 
+drop down menu)  
+2. Once you are in in the course workspace, click on the blue arrow next to the  
+"New Project" button  
+3. Click on "New Project from Git Repo"  
+4. Paste the link you copied from GitHub into the box  
+5. Check the box that says "Add packages from the base project"  
+6. Click on the blue "OK" button  
+7. Enter in your GitHub username and password  
+__Important: If you get these wrong it won't open your GitHub assignment!__  
+
+
+You should now be in your team's GitHub assignment in the RStudio Cloud! Now 
+you can interact with the assignment the way we did for Lab 1, with a few 
+exceptions.  
+
+* When you save your document, that is only a __local__ save and does not 
+update your project to GitHub.  
+* To update your project on GitHub you need to (1) stage your changes, (2) 
+commit those changes, and (3) push your changes up to GitHub.  
+
+
+__Add your group's names to the top of the document and click save.__ 
+
+Click on the Git tab in the upper right hand corner. You should see that the 
+lab2.Rmd file appears, since it was modified. To push this change to GitHub, we
+will carry out the following steps:   
+
+1. Declare to RStudio who you are by running the code below (changing my 
+information to yours): 
+
+```{r, eval = FALSE}
+# To commit, push, and pull your changes to GitHub
+
+# First -- load up the usethis package
+library(usethis) 
+
+# Second -- specify your GitHub username and email address
+use_git_config(user.name = "atheobold", user.email = "allisontheobold@montana.edu")
+
+# Third -- check by running a git situation-report
+git_sitrep()
+```
+
+2. Now click to check the box next to the Lab 2/lab2.Rmd  
+3. Click the commit button  
+4. A box will open to show you the changes in your document  
+5. Type a __explanatory__ commit message in the commit box (e.g. changed group 
+member names)  
+6. Click the commit button  
+7. A box will appear saying how much you added/deleted to the document, click 
+close  
+8. Now click the push button  
+9. Enter in your GitHub username and password  
+10. Once it has pushed your changes the box will say "HEAD -> master"  
+
+You've done it! Now continue making __small changes__, commiting them, and 
+pushing them up to GitHub!  
